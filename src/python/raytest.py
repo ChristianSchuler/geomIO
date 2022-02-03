@@ -134,8 +134,8 @@ def fastRay(triangles, lc, grid):
     Layers = len(np.unique(grid[2,:]))                     # number of different z coordinates
     numPoints = np.unique(grid[2,:], return_counts = True)[1][0]  # number of points per layer
     # I need every 56th(layers) x and y coordinate better have function that determines this
-    x = grid[0,:])
-    y = grid[1,:])
+    x = grid[0,:]
+    y = grid[1,:]
     points = np.concatenate((x,y))
     #points = np.array([[grid[0,0:Layers], grid[1,0:Layers]]])     # x and y coordinates of these cells
     numPoints = points.size                                 # number of cells per z coordinate

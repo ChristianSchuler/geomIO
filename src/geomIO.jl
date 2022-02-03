@@ -16,6 +16,7 @@ end
 export pygeomio
 
 include("./geomIO_routines.jl")
+include("./markers/marker_routines.jl")
 
 
 end # module

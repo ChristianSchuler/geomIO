@@ -49,8 +49,7 @@ def getPoints2D(inFile, nPrec):
     Ref = np.array([])
     Coordinates = np.array([])
     lP = np.array([])
-    t = np.linspace(0,1, nPrec)
-    it = 0
+    t  = np.linspace(0,1, nPrec)
 
     for i in range(len(x)):
         if data.Commented[i]:
@@ -81,11 +80,11 @@ def getPoints2D(inFile, nPrec):
                     seg = cPoints[r][p]
                     for s in range(nPrec):
                         B = deCastel(seg,t[s])
-                        it += len(B)
 
                         Coordinates = np.append([B],Coordinates)
 
-        lP = np.append([it],lP)         
+
+            lP = np.append(len(Coordinates),lP)         
                 
     newshape = int(len(Ref)/2)
     Ref = np.reshape(Ref,(newshape,2))
