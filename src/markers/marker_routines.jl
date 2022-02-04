@@ -7,7 +7,9 @@ struct that contains all neccessary iformation about the different paths
 """
 
 mutable struct PathObject
-    Coords :: NamedTuple
+    Pathnames :: Tuple
+    Coords    :: NamedTuple
+    Ref       :: NamedTuple
 end
 
 function ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
@@ -61,28 +63,28 @@ end
 """
 Constructur for PathInfo
 """
-function ConstPathObject(strings::Vector{Any},paths::Vector{Any})
+function ConstPathObject(strings::Vector{String},paths::Vector{Any},RefD::NamedTuple{(:x, :y), Tuple{Vector{Int64}, Vector{Int64}}})
 
     # convert to name and coord info to NamedTuple
 
     s = Tuple(Symbol(strings[i]) for i = 1:length(strings)) # also creating symbols out of strings
     p = Tuple(paths[i] for i = 1:length(paths))
 
-    PathInfo = PathObject(NamedTuple{s}(p))
+    PathInfo = PathObject(Tuple(strings),NamedTuple{s}(p),RefD)
 
     return PathInfo
 
 end 
 
 """
-returns array of path name strings, mind the order!
+returns array of path name strings, order is important!
 """
 function getLayerNames(data::PythonCall.Py)
 
     namesP    = pyconvert(Vector{String},data.CurveNames) # names of paths
     namesL    = pyconvert(Vector{String},data.LayerNames) # names of layers
 
-    namesList = []
+    namesList = String[]
 
     for (ind,name) in enumerate(namesP)
 
@@ -112,6 +114,7 @@ function ExtractPaths(Ref::PythonCall.Py,Coords::PythonCall.Py,lP::PythonCall.Py
     Xref = [minimum(Ref[:,1]),maximum(Ref[:,1])]
     Yref = [minimum(Ref[:,2]),maximum(Ref[:,2])]
 
+    #Refnt = NamedTuple{Tuple([:x,:y])}(Tuple([Xref,Yref]))
     append!(lP,0)
     lP        = reverse(lP)
     Coords    = reverse(Coords,dims=1)
@@ -126,13 +129,21 @@ function ExtractPaths(Ref::PythonCall.Py,Coords::PythonCall.Py,lP::PythonCall.Py
 
 end
 
+
 function plotMapview(PathInfo::PathObject)
 
-   display(plot(PathInfo.Coords[1][:,1],PathInfo.Coords[1][:,2]))
+    nP = length(PathInfo.Coords) # number of paths
+    display(plot(PathInfo.Coords[length(PathInfo.Coords)][:,1],PathInfo.Coords[length(PathInfo.Coords)][:,2],fill=0,aspect_ratio=1,label=PathInfo.Pathnames[nP],legend=:outerright,grid=false,xlims=(minimum(PathInfo.Ref.x),maximum(PathInfo.Ref.x)),ylims = (minimum(PathInfo.Ref.y),maximum(PathInfo.Ref.y))))
 
-    for i = 2:length(PathInfo.Coords)
+    for i = 1:length(PathInfo.Coords)-1
 
-        display(plot!(PathInfo.Coords[i][:,1],PathInfo.Coords[i][:,2]))
+        if cmp(PathInfo.Pathnames[nP-i],"trench") == 1
+            display(plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],linewidth=4,label=PathInfo.Pathnames[nP-i]))
+
+        else
+            display(plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],fill=0,label=PathInfo.Pathnames[nP-i]))
+
+        end
 
     end
 

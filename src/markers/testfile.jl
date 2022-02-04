@@ -1,11 +1,14 @@
 # first activate geomIO
 # ] activate <path/to/folder> or ] activate .
 
-GeomIO_path = "/home/chris/Desktop/geomIO_mapview/geomIO"
-conda_env = `conda activate /home/chris/Desktop/geomIO_mapview/geomIO/conda_env`
+#GeomIO_path = "/home/chris/Desktop/geomIO_mapview/geomIO"
+#conda_env = `conda activate /home/chris/Desktop/geomIO_mapview/geomIO/conda_env`
+
+GeomIO_path = "/home/chris/Desktop/present_day_Alps/geomIO"
+conda_env = `conda activate /home/chris/Desktop/present_day_Alps/geomIO/conda_env`
 
 # activate geomIO package
-using Pkg, Revise, Plots
+using Pkg, Revise
 Pkg.activate(GeomIO_path)
 
 # activate conda environment that was created by PythonCall
@@ -27,18 +30,14 @@ xref, yref, PathCoords = ExtractPaths(Ref,Coords,lP)
 #domain size (mapview)
 Dxref = [0,1000]
 Dyref = [0,500]
+RefD = NamedTuple{Tuple([:x,:y])}(Tuple([Dxref,Dyref]))
 ScaledCoords = ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
 
-PathNames               = getLayerNames(data)
+PathNames = getLayerNames(data)
 
-PathInfo = ConstPathObject(PathNames,ScaledCoords)
+PathInfo  = ConstPathObject(PathNames,ScaledCoords,RefD)
 
-
-# plot path
-display(plot(ScaledCoords[1][:,1],ScaledCoords[1][:,2]))
-scatter!(ScaledCoords[2][:,1],ScaledCoords[2][:,2])
-scatter!(ScaledCoords[3][:,1],ScaledCoords[3][:,2])
-
+# plot svg info
 plotMapview(PathInfo)
 
 
