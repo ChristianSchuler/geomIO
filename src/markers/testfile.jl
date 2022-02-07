@@ -28,8 +28,8 @@ xref, yref, PathCoords = ExtractPaths(Ref,Coords,lP)
 
 # scale path Coords
 #domain size (mapview)
-Dxref = [0,1000]
-Dyref = [0,500]
+Dxref = [-500,500]
+Dyref = [-1000,-500]
 RefD = NamedTuple{Tuple([:x,:y])}(Tuple([Dxref,Dyref]))
 ScaledCoords = ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
 

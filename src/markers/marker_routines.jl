@@ -14,8 +14,10 @@ end
 
 function ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
 
-    # shift Coordinates so that the origin is 0,0
+    Dx_diff = abs(Dxref[2] - Dxref[1])
+    Dy_diff = abs(Dyref[2] - Dyref[1])
 
+    # shift Coordinates so that the origin is 0,0
     for i = 1:length(PathCoords)
 
         PathCoords[i][:,1] .-= xref[1]
@@ -49,10 +51,16 @@ function ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
 
         end
 
-        # consider the domain size scale the coordinates accordingly
-        # WARNING needs to be adapted for domains not starting at 0!!!!!
-        PathCoords[i][:,1] .*= Dxref[2]
-        PathCoords[i][:,2] .*= Dyref[2]
+        # consider the domain size  and scale the coordinates accordingly
+
+
+        #PathCoords[i][:,1] .*= abs(Dxref[2] - Dxref[1])
+        #PathCoords[i][:,2] .*= abs(Dyref[2] - Dyref[1])
+        PathCoords[i][:,1] .*= Dx_diff
+        PathCoords[i][:,2] .*= Dy_diff
+
+        PathCoords[i][:,1] .+= Dxref[1]
+        PathCoords[i][:,2] .+= Dyref[1]
 
     end
 
