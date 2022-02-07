@@ -1,11 +1,11 @@
 # first activate geomIO
 # ] activate <path/to/folder> or ] activate .
 
-#GeomIO_path = "/home/chris/Desktop/geomIO_mapview/geomIO"
-#conda_env = `conda activate /home/chris/Desktop/geomIO_mapview/geomIO/conda_env`
+GeomIO_path = "/home/chris/Desktop/geomIO_mapview/geomIO"
+conda_env = `conda activate /home/chris/Desktop/geomIO_mapview/geomIO/conda_env`
 
-GeomIO_path = "/home/chris/Desktop/present_day_Alps/geomIO"
-conda_env = `conda activate /home/chris/Desktop/present_day_Alps/geomIO/conda_env`
+#GeomIO_path = "/home/chris/Desktop/present_day_Alps/geomIO"
+#conda_env = `conda activate /home/chris/Desktop/present_day_Alps/geomIO/conda_env`
 
 # activate geomIO package
 using Pkg, Revise
