@@ -18,27 +18,34 @@ run(conda_env, wait=false);
 #using Conda
 using geomIO
 
-data = pygeomio.readSVG("subduction.svg");
+const File = "subduction.svg" # filenmane
+const prec = 10               # precision of routine that calculates coordinetes (getPoint2D)
 
-# convert to normal coordinates
-Ref,Coords,lP = pygeomio.getPoints2D("subduction.svg",10);
-
-# extract Path Info information
-xref, yref, PathCoords = ExtractPaths(Ref,Coords,lP)
-
-# scale path Coords
 #domain size (mapview)
-Dxref = [-500,500]
-Dyref = [-1000,-500]
-RefD = NamedTuple{Tuple([:x,:y])}(Tuple([Dxref,Dyref]))
-ScaledCoords = ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
+const Dxref = [-500.0,500.0]
+const Dyref = [-1000.0,-500.0]
 
-PathNames = getLayerNames(data)
-
-PathInfo  = ConstPathObject(PathNames,ScaledCoords,RefD)
+# put scaled Path Information into PathObject struct
+PathInfo  = ConstPathObject(File,prec,Dxref,Dyref)
 
 # plot svg info
 plotMapview(PathInfo)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

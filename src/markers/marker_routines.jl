@@ -6,26 +6,26 @@ export PathObject,ExtractPaths, getLayerNames, ConstPathObject, ScalePathCoords,
 struct that contains all neccessary iformation about the different paths
 """
 
-mutable struct PathObject
+struct PathObject
     Pathnames :: Tuple
     Coords    :: NamedTuple
     Ref       :: NamedTuple
 end
 
-function ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
+function ScalePathCoords(Dxref::Vector{Float64},Dyref::Vector{Float64},xref::Vector{Float64},yref::Vector{Float64},PathCoords::Vector{Any})
 
-    Dx_diff = abs(Dxref[2] - Dxref[1])
     Dy_diff = abs(Dyref[2] - Dyref[1])
+    Dx_diff = abs(Dxref[2] - Dxref[1])
 
     # shift Coordinates so that the origin is 0,0
     for i = 1:length(PathCoords)
 
-        PathCoords[i][:,1] .-= xref[1]
-        PathCoords[i][:,2] .-= yref[1]
+        PathCoords[i][:,1]  .-= xref[1]
+        PathCoords[i][:,2]  .-= yref[1]
 
         # scale the Coordinates so that they range from 0 to 1 in x and y direction
-        PathCoords[i][:,1] ./= (abs(xref[2]-xref[1]))
-        PathCoords[i][:,2] ./= (abs(yref[2]-yref[1]))
+        PathCoords[i][:,1]  ./= (abs(xref[2]-xref[1]))
+        PathCoords[i][:,2]  ./= (abs(yref[2]-yref[1]))
 
         # crop area to domain size
 
@@ -34,17 +34,17 @@ function ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
             if (maximum(PathCoords[i][:,2]) > xref[2] || maximum(PathCoords[i][:,1]) > yref[2] || minimum(PathCoords[i][:,1]) > xref[1] || minimum(PathCoords[i][:,1]) > xref[1])
 
                 # check y values
-                if PathCoords[i][j,1] < 0
-                    PathCoords[i][j,1] = 0
+                if PathCoords[i][j,1] < 0.0
+                    PathCoords[i][j,1] = 0.0
                 elseif PathCoords[i][j,1] > 1
-                    PathCoords[i][j,1] = 1
+                    PathCoords[i][j,1] = 1.0
                 end
 
-                #check x values
-                if PathCoords[i][j,2] < 0
-                    PathCoords[i][j,2] = 0
+                # check x values
+                if PathCoords[i][j,2] < 0.0
+                    PathCoords[i][j,2] = 0.0
                 elseif PathCoords[i][j,2] > 1
-                    PathCoords[i][j,2] = 1
+                    PathCoords[i][j,2] = 1.0
                 end
 
             end
@@ -52,7 +52,6 @@ function ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
         end
 
         # consider the domain size  and scale the coordinates accordingly
-
 
         #PathCoords[i][:,1] .*= abs(Dxref[2] - Dxref[1])
         #PathCoords[i][:,2] .*= abs(Dyref[2] - Dyref[1])
@@ -71,14 +70,29 @@ end
 """
 Constructur for PathInfo
 """
-function ConstPathObject(strings::Vector{String},paths::Vector{Any},RefD::NamedTuple{(:x, :y), Tuple{Vector{Int64}, Vector{Int64}}})
+function ConstPathObject(File::String,prec::Int,Dxref::Vector{Float64},Dyref::Vector{Float64})
+
+    # read svg file
+    data = pygeomio.readSVG(File)
+    PathNames = getLayerNames(data)
+
+    # get coordinates
+    Ref,Coords,lP = pygeomio.getPoints2D(File,prec);
+
+    # extract Path Info information
+    xref, yref, PathCoords = ExtractPaths(Ref,Coords,lP)
+
+    # scale coordinates
+    ScaledCoords = ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
+
+    RefD = NamedTuple{Tuple([:x,:y])}(Tuple([Dxref,Dyref]))
 
     # convert to name and coord info to NamedTuple
 
-    s = Tuple(Symbol(strings[i]) for i = 1:length(strings)) # also creating symbols out of strings
-    p = Tuple(paths[i] for i = 1:length(paths))
+    s = Tuple(Symbol(PathNames[i]) for i = 1:length(PathNames)) # also creating symbols out of strings
+    p = Tuple(ScaledCoords[i] for i = 1:length(ScaledCoords))
 
-    PathInfo = PathObject(Tuple(strings),NamedTuple{s}(p),RefD)
+    PathInfo = PathObject(Tuple(PathNames),NamedTuple{s}(p),RefD)
 
     return PathInfo
 
@@ -141,19 +155,20 @@ end
 function plotMapview(PathInfo::PathObject)
 
     nP = length(PathInfo.Coords) # number of paths
-    display(plot(PathInfo.Coords[length(PathInfo.Coords)][:,1],PathInfo.Coords[length(PathInfo.Coords)][:,2],fill=0,aspect_ratio=1,label=PathInfo.Pathnames[nP],legend=:outerright,grid=false,xlims=(minimum(PathInfo.Ref.x),maximum(PathInfo.Ref.x)),ylims = (minimum(PathInfo.Ref.y),maximum(PathInfo.Ref.y))))
+    p  = plot(PathInfo.Coords[length(PathInfo.Coords)][:,1],PathInfo.Coords[length(PathInfo.Coords)][:,2],fill=0,aspect_ratio=1,label=PathInfo.Pathnames[nP],legend=:outerright,grid=false,xlims=(minimum(PathInfo.Ref.x),maximum(PathInfo.Ref.x)),ylims = (minimum(PathInfo.Ref.y),maximum(PathInfo.Ref.y)))
 
     for i = 1:length(PathInfo.Coords)-1
 
         if cmp(PathInfo.Pathnames[nP-i],"trench") == 1
-            display(plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],linewidth=4,label=PathInfo.Pathnames[nP-i]))
+            p = plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],linewidth=4,label=PathInfo.Pathnames[nP-i])
 
         else
-            display(plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],fill=0,label=PathInfo.Pathnames[nP-i]))
+            p = plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],fill=0,label=PathInfo.Pathnames[nP-i])
 
         end
 
     end
 
+    display(p)
 
 end
