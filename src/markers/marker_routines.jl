@@ -77,7 +77,15 @@ function ConstPathObject(File::String,prec::Int,Dxref::Vector{Float64},Dyref::Ve
     PathNames = getLayerNames(data)
 
     # get coordinates
-    Ref,Coords,lP = pygeomio.getPoints2D(File,prec);
+   Ref,Coords,lP = pygeomio.getPoints2D(File,prec)
+
+    # error catching; verify the Reference line
+    Ref1 = pyconvert(Float64,Ref[1,0])
+    Ref2 = pyconvert(Float64,Ref[1,1])
+
+    if ( typeof(Ref1)<:Float64 || typeof(Ref2)<:Float64 ) == false
+        error("something wrong with the reference line")
+    end
 
     # extract Path Info information
     xref, yref, PathCoords = ExtractPaths(Ref,Coords,lP)
