@@ -159,19 +159,21 @@ function ExtractPaths(Ref::PythonCall.Py,Coords::PythonCall.Py,lP::PythonCall.Py
 
 end
 
-
+"""
+plot svg input
+"""
 function plotMapview(PathInfo::PathObject)
 
-    nP = length(PathInfo.Coords) # number of paths
-    p  = plot(PathInfo.Coords[length(PathInfo.Coords)][:,1],PathInfo.Coords[length(PathInfo.Coords)][:,2],fill=0,aspect_ratio=1,label=PathInfo.Pathnames[nP],legend=:outerright,grid=false,xlims=(minimum(PathInfo.Ref.x),maximum(PathInfo.Ref.x)),ylims = (minimum(PathInfo.Ref.y),maximum(PathInfo.Ref.y)))
+    p  = plot(PathInfo.Coords[1][:,1],PathInfo.Coords[1][:,2],fill=0,aspect_ratio=1,label=PathInfo.Pathnames[1],legend=:outerright,grid=false,xlims=(minimum(PathInfo.Ref.x),maximum(PathInfo.Ref.x)),ylims = (minimum(PathInfo.Ref.y),maximum(PathInfo.Ref.y)))
 
-    for i = 1:length(PathInfo.Coords)-1
+    for i = 2:length(PathInfo.Coords)
 
-        if cmp(PathInfo.Pathnames[nP-i],"trench") == 1
-            p = plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],linewidth=4,label=PathInfo.Pathnames[nP-i])
+        
+        if ((cmp(PathInfo.Pathnames[i],"trench") == 1) || (cmp(PathInfo.Pathnames[i],"mor") == 1) || (cmp(PathInfo.Pathnames[i],"trench") == 0) || (cmp(PathInfo.Pathnames[i],"mor") == 0))
+        p = plot!(PathInfo.Coords[i][:,1],PathInfo.Coords[i][:,2],linewidth=4,label=PathInfo.Pathnames[i])
 
         else
-            p = plot!(PathInfo.Coords[nP-i][:,1],PathInfo.Coords[nP-i][:,2],fill=0,label=PathInfo.Pathnames[nP-i])
+            p = plot!(PathInfo.Coords[i][:,1],PathInfo.Coords[i][:,2],fill=0,label=PathInfo.Pathnames[i])
 
         end
 
