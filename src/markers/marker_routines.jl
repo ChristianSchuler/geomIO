@@ -12,7 +12,7 @@ struct PathObject
     Ref       :: NamedTuple
 end
 
-function ScalePathCoords(Dxref::Vector{Float64},Dyref::Vector{Float64},xref::Vector{Float64},yref::Vector{Float64},PathCoords::Vector{Any})
+function ScalePathCoords(Dxref::Vector{Float64},Dyref::Vector{Float64},xref::Vector{Float64},yref::Vector{Float64},PathCoords::Vector{Any},Pathnames)
 
     Dy_diff = abs(Dyref[2] - Dyref[1])
     Dx_diff = abs(Dxref[2] - Dxref[1])
@@ -30,24 +30,28 @@ function ScalePathCoords(Dxref::Vector{Float64},Dyref::Vector{Float64},xref::Vec
         # crop area to domain size
 
         for j = 1:length(PathCoords[i][:,1])
+            
+            if (cmp(Pathnames[i],"mor") != 1 && cmp(Pathnames[i],"mor") != 0)
 
-            if (maximum(PathCoords[i][:,2]) > xref[2] || maximum(PathCoords[i][:,1]) > yref[2] || minimum(PathCoords[i][:,1]) > xref[1] || minimum(PathCoords[i][:,1]) > xref[1])
+                if (maximum(PathCoords[i][:,2]) > xref[2] || maximum(PathCoords[i][:,1]) > yref[2] || minimum(PathCoords[i][:,1]) > xref[1] || minimum(PathCoords[i][:,1]) > xref[1])
 
                 # check y values
-                if PathCoords[i][j,1] < 0.0
-                    PathCoords[i][j,1] = 0.0
-                elseif PathCoords[i][j,1] > 1
-                    PathCoords[i][j,1] = 1.0
-                end
+                    if PathCoords[i][j,1] < 0.0
+                        PathCoords[i][j,1] = 0.0
+                    elseif PathCoords[i][j,1] > 1
+                        PathCoords[i][j,1] = 1.0
+                    end
 
-                # check x values
-                if PathCoords[i][j,2] < 0.0
-                    PathCoords[i][j,2] = 0.0
-                elseif PathCoords[i][j,2] > 1
-                    PathCoords[i][j,2] = 1.0
-                end
+                    # check x values
+                    if PathCoords[i][j,2] < 0.0
+                        PathCoords[i][j,2] = 0.0
+                    elseif PathCoords[i][j,2] > 1
+                        PathCoords[i][j,2] = 1.0
+                    end
 
+                end
             end
+
 
         end
 
@@ -77,7 +81,7 @@ function ConstPathObject(File::String,prec::Int,Dxref::Vector{Float64},Dyref::Ve
     PathNames = getLayerNames(data)
 
     # get coordinates
-   Ref,Coords,lP = pygeomio.getPoints2D(File,prec)
+    Ref,Coords,lP = pygeomio.getPoints2D(File,prec)
 
     # error catching; verify the Reference line
     Ref1 = pyconvert(Float64,Ref[1,0])
@@ -91,7 +95,7 @@ function ConstPathObject(File::String,prec::Int,Dxref::Vector{Float64},Dyref::Ve
     xref, yref, PathCoords = ExtractPaths(Ref,Coords,lP)
 
     # scale coordinates
-    ScaledCoords = ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords)
+    ScaledCoords = ScalePathCoords(Dxref,Dyref,xref,yref,PathCoords,PathNames)
 
     RefD = NamedTuple{Tuple([:x,:y])}(Tuple([Dxref,Dyref]))
 
